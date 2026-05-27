@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 // Hook that watches user location via GPS. Falls back gracefully if permission denied.
 // On NYC subways, GPS is unreliable underground — we surface the timestamp so the
 // UI can show "last known" and the position continues to update at ground level.
-export function useLocation(enabled = true) {
+export function useGeoLocation(enabled = true) {
   const [position, setPosition] = useState(null);
   const [error, setError] = useState(null);
   const [permissionState, setPermissionState] = useState('unknown');

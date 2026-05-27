@@ -4,7 +4,7 @@ import { ArrowLeft, MapPin, Navigation, AlertTriangle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { findStopById } from '@/lib/gtfsData';
-import { useLocation } from '@/lib/useLocation';
+import { useGeoLocation } from '@/lib/useGeoLocation';
 import { useSettings } from '@/lib/useSettings';
 import { haversineMeters, metersToStops, formatDistance } from '@/lib/distance';
 import { triggerAlert } from '@/lib/alerts';
@@ -29,7 +29,7 @@ export default function RidePage() {
   }, [decodedId]);
 
   const { settings, loaded } = useSettings();
-  const { position, error: locError, permissionState } = useLocation(true);
+  const { position, error: locError, permissionState } = useGeoLocation(true);
   const [alertTriggered, setAlertTriggered] = useState(false);
   const sessionIdRef = useRef(null);
   const alertFiredRef = useRef(false);
