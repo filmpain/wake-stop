@@ -34,10 +34,27 @@ export default function RidePage() {
   const sessionIdRef = useRef(null);
   const alertFiredRef = useRef(false);
 
-  // Create RideSession on mount
+  // Create/reuse RideSession on mount. Reuses an active session for the same
+  // stop if one exists, and cancels any other stale active sessions to keep
+  // the "armed" state consistent.
   useEffect(() => {
     if (!favStop || sessionIdRef.current) return;
     (async () => {
+      const active = await base44.entities.RideSession.filter({ status: 'active' });
+      const matching = active.find((s) => s.destination_stop_id === favStop.stop_id);
+      // Cancel any other stale active sessions
+      await Promise.all(
+        active
+          .filter((s) => s.id !== matching?.id)
+          .map((s) => base44.entities.RideSession.update(s.id, {
+            status: 'cancelled',
+            ended_at: new Date().toISOString(),
+          }))
+      );
+      if (matching) {
+        sessionIdRef.current = matching.id;
+        return;
+      }
       const created = await base44.entities.RideSession.create({
         destination_stop_id: favStop.stop_id,
         destination_stop_name: favStop.stop_name,
@@ -79,14 +96,16 @@ export default function RidePage() {
     }
   }, [stopsAway, settings, loaded]);
 
-  // Cancel session
+  // Cancel session — cancel ALL active sessions to clear any orphans too
   const handleCancel = async () => {
-    if (sessionIdRef.current) {
-      await base44.entities.RideSession.update(sessionIdRef.current, {
+    const active = await base44.entities.RideSession.filter({ status: 'active' });
+    await Promise.all(
+      active.map((s) => base44.entities.RideSession.update(s.id, {
         status: 'cancelled',
         ended_at: new Date().toISOString(),
-      });
-    }
+      }))
+    );
+    sessionIdRef.current = null;
     navigate('/');
   };
 

@@ -55,11 +55,14 @@ export default function Home() {
   const handleToggleArm = async (stop) => {
     const isArmed = activeSession && activeSession.destination_stop_id === stop.stop_id;
     if (isArmed) {
-      // Disarm: cancel the active session
-      await base44.entities.RideSession.update(activeSession.id, {
-        status: 'cancelled',
-        ended_at: new Date().toISOString(),
-      });
+      // Disarm: cancel ALL active sessions to clear any orphans
+      const active = await base44.entities.RideSession.filter({ status: 'active' });
+      await Promise.all(
+        active.map((s) => base44.entities.RideSession.update(s.id, {
+          status: 'cancelled',
+          ended_at: new Date().toISOString(),
+        }))
+      );
       setActiveSession(null);
     } else {
       // Arm: open the confirmation sheet
