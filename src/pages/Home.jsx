@@ -6,22 +6,36 @@ import { base44 } from '@/api/base44Client';
 import { useTheme } from '@/lib/ThemeContext';
 import WakeStopLogo from '@/components/WakeStopLogo';
 import StopCard from '@/components/StopCard';
+import ArmedBanner from '@/components/ArmedBanner';
+import ArmConfirmSheet from '@/components/ArmConfirmSheet';
 
 export default function Home() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeSession, setActiveSession] = useState(null);
+  const [pendingStop, setPendingStop] = useState(null);
 
-  const loadFavorites = async () => {
-    const rows = await base44.entities.FavoriteStop.list('sort_order', 50);
+  const loadData = async () => {
+    const [rows, sessions] = await Promise.all([
+      base44.entities.FavoriteStop.list('sort_order', 50),
+      base44.entities.RideSession.filter({ status: 'active' }, '-created_date', 1),
+    ]);
     setFavorites(rows);
+    setActiveSession(sessions[0] || null);
     setLoading(false);
   };
 
-  useEffect(() => { loadFavorites(); }, []);
+  useEffect(() => { loadData(); }, []);
 
   const handleTap = (stop) => {
+    setPendingStop(stop);
+  };
+
+  const handleConfirmArm = () => {
+    const stop = pendingStop;
+    setPendingStop(null);
     navigate(`/ride/${encodeURIComponent(stop.stop_id)}`);
   };
 
@@ -44,6 +58,13 @@ export default function Home() {
           {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
       </div>
+
+      {/* Armed banner */}
+      {activeSession && (
+        <div className="mb-4">
+          <ArmedBanner session={activeSession} />
+        </div>
+      )}
 
       {/* Quick search bar */}
       <button
@@ -86,17 +107,24 @@ export default function Home() {
       </div>
 
       {/* Tip */}
-      {favorites.length > 0 && (
+      {favorites.length > 0 && !activeSession && (
         <div className="mt-8 bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-start gap-3">
           <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 text-primary" />
           </div>
           <div className="text-sm">
-            <div className="font-semibold mb-0.5">One tap to arm</div>
-            <div className="text-muted-foreground">Tap any favorite to start monitoring. Doze off — we'll wake you up.</div>
+            <div className="font-semibold mb-0.5">Tap a stop to arm</div>
+            <div className="text-muted-foreground">Pick a favorite, confirm, and we'll wake you up when you're close.</div>
           </div>
         </div>
       )}
+
+      <ArmConfirmSheet
+        stop={pendingStop}
+        open={!!pendingStop}
+        onClose={() => setPendingStop(null)}
+        onConfirm={handleConfirmArm}
+      />
     </div>
   );
 }
