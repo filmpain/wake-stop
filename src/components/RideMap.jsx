@@ -48,8 +48,14 @@ export default function RideMap({ userLat, userLon, destLat, destLon, className 
     destMarkerRef.current = L.marker([destLat, destLon], { icon: destIcon }).addTo(map);
     mapRef.current = map;
     return () => {
+      // Stop any in-flight zoom/pan animations before destroying the map,
+      // otherwise leaflet's transitionend handler fires on a removed _mapPane.
+      try { map.stop(); } catch (_) {}
       map.remove();
       mapRef.current = null;
+      userMarkerRef.current = null;
+      destMarkerRef.current = null;
+      lineRef.current = null;
     };
   }, [destLat, destLon]);
 
@@ -74,7 +80,7 @@ export default function RideMap({ userLat, userLon, destLat, destLon, className 
     }).addTo(map);
 
     const bounds = L.latLngBounds([[userLat, userLon], [destLat, destLon]]);
-    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15 });
+    map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15, animate: false });
   }, [userLat, userLon, destLat, destLon]);
 
   return <div ref={containerRef} className={className} style={{ minHeight: 240 }} />;
