@@ -8,6 +8,7 @@ import WakeStopLogo from '@/components/WakeStopLogo';
 import StopCard from '@/components/StopCard';
 import ArmedBanner from '@/components/ArmedBanner';
 import ArmConfirmSheet from '@/components/ArmConfirmSheet';
+import PullToRefresh from '@/components/PullToRefresh';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -107,6 +108,7 @@ export default function Home() {
       </button>
 
       {/* Favorites */}
+      <PullToRefresh onRefresh={loadData}>
       <div className="mt-8">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Favorites</h2>
@@ -144,6 +146,7 @@ export default function Home() {
           </div>
         )}
       </div>
+      </PullToRefresh>
 
       {/* Tip */}
       {favorites.length > 0 && !activeSession && (

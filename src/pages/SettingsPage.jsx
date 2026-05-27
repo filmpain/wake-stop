@@ -1,9 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell, Vibrate, Volume2, Moon, Sun, Play } from 'lucide-react';
+import { ArrowLeft, Bell, Vibrate, Volume2, Moon, Sun, Play, Trash2, AlertTriangle } from 'lucide-react';
 import { useSettings } from '@/lib/useSettings';
 import { useTheme } from '@/lib/ThemeContext';
 import { SOUND_OPTIONS, HAPTIC_OPTIONS, triggerAlert } from '@/lib/alerts';
+import { base44 } from '@/api/base44Client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -16,6 +28,22 @@ export default function SettingsPage() {
 
   const testAlert = () => {
     triggerAlert(settings);
+  };
+
+  const handleDeleteAccount = async () => {
+    // Wipe the user's data, then log them out. Their User record persists
+    // (only admins can delete users), but all personal data is removed.
+    const [favs, sessions, settingsRows] = await Promise.all([
+      base44.entities.FavoriteStop.list(),
+      base44.entities.RideSession.list(),
+      base44.entities.UserSettings.list(),
+    ]);
+    await Promise.all([
+      ...favs.map((f) => base44.entities.FavoriteStop.delete(f.id)),
+      ...sessions.map((s) => base44.entities.RideSession.delete(s.id)),
+      ...settingsRows.map((s) => base44.entities.UserSettings.delete(s.id)),
+    ]);
+    base44.auth.logout();
   };
 
   return (
@@ -118,6 +146,41 @@ export default function SettingsPage() {
         <Play className="w-5 h-5" />
         Test alert
       </button>
+
+      {/* Danger zone */}
+      <Section title="Danger Zone" icon={AlertTriangle}>
+        <div className="border-2 border-destructive/30 rounded-2xl p-4 bg-destructive/5">
+          <div className="font-semibold text-sm mb-1">Delete account</div>
+          <div className="text-xs text-muted-foreground mb-3">
+            Permanently removes your favorites, ride history, and preferences. You'll be signed out.
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className="w-full h-11 rounded-xl bg-destructive text-destructive-foreground font-bold flex items-center justify-center gap-2">
+                <Trash2 className="w-4 h-4" />
+                Delete account
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete your favorites, ride sessions, and settings, then sign you out. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Yes, delete everything
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </Section>
 
       <div className="mt-8 text-center text-xs text-muted-foreground">
         Wake Stop · NYC MTA GTFS data<br />

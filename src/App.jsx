@@ -1,16 +1,47 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import Layout from '@/components/Layout';
-import Home from '@/pages/Home';
-import SearchPage from '@/pages/SearchPage';
-import SettingsPage from '@/pages/SettingsPage';
 import RidePage from '@/pages/RidePage';
+
+const PageWrap = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, x: 40 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -40 }}
+    transition={{ duration: 0.25, ease: 'easeOut' }}
+  >
+    {children}
+  </motion.div>
+);
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  // Treat all bottom-nav tabs as one route key so we don't unmount the Layout
+  // when switching tabs (Layout handles inner transitions + state preservation).
+  const tabPaths = ['/', '/search', '/settings'];
+  const routeKey = tabPaths.includes(location.pathname) ? 'tabs' : location.pathname;
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={routeKey}>
+        <Route element={<Layout />}>
+          <Route path="/" element={null} />
+          <Route path="/search" element={null} />
+          <Route path="/settings" element={null} />
+        </Route>
+        <Route path="/ride/:stopId" element={<PageWrap><RidePage /></PageWrap>} />
+        <Route path="*" element={<PageWrap><PageNotFound /></PageWrap>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -32,17 +63,7 @@ const AuthenticatedApp = () => {
     }
   }
 
-  return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-      </Route>
-      <Route path="/ride/:stopId" element={<RidePage />} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
-  );
+  return <AnimatedRoutes />;
 };
 
 function App() {
