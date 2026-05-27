@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Train, Bus, ChevronRight } from 'lucide-react';
+import { Star, Train, Bus, ChevronRight, Check } from 'lucide-react';
 import RouteBadge from './RouteBadge';
 
-export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, action = 'chevron' }) {
+export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, onToggleArm, isArmed, action = 'chevron' }) {
   const Icon = stop.stop_type === 'subway' ? Train : Bus;
 
   return (
@@ -41,6 +41,26 @@ export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, ac
             <Star
               className={`w-5 h-5 ${isFavorite ? 'fill-accent text-accent' : 'text-muted-foreground'}`}
             />
+          </button>
+        ) : action === 'arm' ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleArm?.(stop); }}
+            className="flex flex-col items-center gap-1 self-center px-1"
+            aria-label={isArmed ? 'Disarm alarm' : 'Arm alarm'}
+            aria-pressed={isArmed}
+          >
+            <div
+              className={`w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-colors ${
+                isArmed
+                  ? 'bg-green-500 border-green-500'
+                  : 'bg-transparent border-muted-foreground/40'
+              }`}
+            >
+              {isArmed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${isArmed ? 'text-green-600 dark:text-green-500' : 'text-muted-foreground'}`}>
+              {isArmed ? 'Armed' : 'Off'}
+            </span>
           </button>
         ) : (
           <ChevronRight className="w-5 h-5 text-muted-foreground self-center" />

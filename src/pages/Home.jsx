@@ -30,13 +30,33 @@ export default function Home() {
   useEffect(() => { loadData(); }, []);
 
   const handleTap = (stop) => {
-    setPendingStop(stop);
+    // Tapping the card body opens details/ride view if armed, otherwise the arm sheet
+    if (activeSession && activeSession.destination_stop_id === stop.stop_id) {
+      navigate(`/ride/${encodeURIComponent(stop.stop_id)}`);
+    } else {
+      setPendingStop(stop);
+    }
   };
 
   const handleConfirmArm = () => {
     const stop = pendingStop;
     setPendingStop(null);
     navigate(`/ride/${encodeURIComponent(stop.stop_id)}`);
+  };
+
+  const handleToggleArm = async (stop) => {
+    const isArmed = activeSession && activeSession.destination_stop_id === stop.stop_id;
+    if (isArmed) {
+      // Disarm: cancel the active session
+      await base44.entities.RideSession.update(activeSession.id, {
+        status: 'cancelled',
+        ended_at: new Date().toISOString(),
+      });
+      setActiveSession(null);
+    } else {
+      // Arm: open the confirmation sheet
+      setPendingStop(stop);
+    }
   };
 
   return (
@@ -99,7 +119,13 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
               >
-                <StopCard stop={fav} onTap={handleTap} />
+                <StopCard
+                  stop={fav}
+                  onTap={handleTap}
+                  action="arm"
+                  isArmed={activeSession?.destination_stop_id === fav.stop_id}
+                  onToggleArm={handleToggleArm}
+                />
               </motion.div>
             ))}
           </div>
