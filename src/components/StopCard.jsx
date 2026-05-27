@@ -43,25 +43,36 @@ export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, on
             />
           </button>
         ) : action === 'arm' ? (
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleArm?.(stop); }}
-            className="flex flex-col items-center gap-1 self-center px-1"
-            aria-label={isArmed ? 'Disarm alarm' : 'Arm alarm'}
-            aria-pressed={isArmed}
-          >
-            <div
-              className={`w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-colors ${
-                isArmed
-                  ? 'bg-green-500 border-green-500'
-                  : 'bg-transparent border-muted-foreground/40'
-              }`}
+          <div className="flex items-center gap-2 self-center">
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(stop); }}
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary"
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
-              {isArmed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
-            </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${isArmed ? 'text-green-600 dark:text-green-500' : 'text-muted-foreground'}`}>
-              {isArmed ? 'Armed' : 'Off'}
-            </span>
-          </button>
+              <Star
+                className={`w-5 h-5 ${isFavorite ? 'fill-accent text-accent' : 'text-muted-foreground'}`}
+              />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleArm?.(stop); }}
+              className="flex flex-col items-center gap-1 px-1"
+              aria-label={isArmed ? 'Disarm alarm' : 'Arm alarm'}
+              aria-pressed={isArmed}
+            >
+              <div
+                className={`w-7 h-7 rounded-lg flex items-center justify-center border-2 transition-colors ${
+                  isArmed
+                    ? 'bg-green-500 border-green-500'
+                    : 'bg-transparent border-muted-foreground/40'
+                }`}
+              >
+                {isArmed && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
+              </div>
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${isArmed ? 'text-green-600 dark:text-green-500' : 'text-muted-foreground'}`}>
+                {isArmed ? 'Armed' : 'Off'}
+              </span>
+            </button>
+          </div>
         ) : (
           <ChevronRight className="w-5 h-5 text-muted-foreground self-center" />
         )}

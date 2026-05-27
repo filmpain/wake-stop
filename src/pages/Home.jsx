@@ -44,6 +44,14 @@ export default function Home() {
     navigate(`/ride/${encodeURIComponent(stop.stop_id)}`);
   };
 
+  const handleToggleFavorite = async (stop) => {
+    // On Home, every shown stop is already a favorite — tapping the star removes it.
+    if (stop.id) {
+      await base44.entities.FavoriteStop.delete(stop.id);
+      setFavorites((prev) => prev.filter((f) => f.id !== stop.id));
+    }
+  };
+
   const handleToggleArm = async (stop) => {
     const isArmed = activeSession && activeSession.destination_stop_id === stop.stop_id;
     if (isArmed) {
@@ -125,6 +133,8 @@ export default function Home() {
                   action="arm"
                   isArmed={activeSession?.destination_stop_id === fav.stop_id}
                   onToggleArm={handleToggleArm}
+                  isFavorite={true}
+                  onToggleFavorite={handleToggleFavorite}
                 />
               </motion.div>
             ))}
