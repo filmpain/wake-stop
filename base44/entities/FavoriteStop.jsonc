@@ -1,0 +1,48 @@
+{
+  "name": "FavoriteStop",
+  "type": "object",
+  "properties": {
+    "stop_id": {
+      "type": "string",
+      "description": "GTFS stop_id"
+    },
+    "stop_name": {
+      "type": "string",
+      "description": "Human readable stop name"
+    },
+    "stop_type": {
+      "type": "string",
+      "enum": [
+        "subway",
+        "bus"
+      ],
+      "description": "Whether subway or bus stop"
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Route IDs serving this stop (e.g. ['Q','N','R'] or ['M15'])"
+    },
+    "stop_lat": {
+      "type": "number"
+    },
+    "stop_lon": {
+      "type": "number"
+    },
+    "nickname": {
+      "type": "string",
+      "description": "Optional user nickname like 'Home' or 'Work'"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "stop_id",
+    "stop_name",
+    "stop_type"
+  ]
+}

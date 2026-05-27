@@ -1,0 +1,55 @@
+{
+  "name": "RideSession",
+  "type": "object",
+  "properties": {
+    "destination_stop_id": {
+      "type": "string"
+    },
+    "destination_stop_name": {
+      "type": "string"
+    },
+    "destination_stop_type": {
+      "type": "string",
+      "enum": [
+        "subway",
+        "bus"
+      ]
+    },
+    "destination_lat": {
+      "type": "number"
+    },
+    "destination_lon": {
+      "type": "number"
+    },
+    "route_id": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "alerted",
+        "completed",
+        "cancelled"
+      ],
+      "default": "active"
+    },
+    "alert_triggered_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "destination_stop_id",
+    "destination_stop_name",
+    "destination_stop_type"
+  ]
+}

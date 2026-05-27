@@ -1,0 +1,55 @@
+{
+  "name": "UserSettings",
+  "type": "object",
+  "properties": {
+    "theme": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light"
+      ],
+      "default": "dark"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "sound",
+        "haptic",
+        "both"
+      ],
+      "default": "both"
+    },
+    "alert_sound": {
+      "type": "string",
+      "enum": [
+        "chime",
+        "alarm",
+        "bell",
+        "buzzer",
+        "gentle"
+      ],
+      "default": "alarm"
+    },
+    "haptic_pattern": {
+      "type": "string",
+      "enum": [
+        "gentle",
+        "strong",
+        "escalating",
+        "sos"
+      ],
+      "default": "escalating"
+    },
+    "stops_advance_warning": {
+      "type": "number",
+      "default": 2,
+      "description": "Trigger alert when N stops away from destination"
+    },
+    "volume": {
+      "type": "number",
+      "default": 0.8,
+      "description": "0.0 to 1.0"
+    }
+  },
+  "required": []
+}
