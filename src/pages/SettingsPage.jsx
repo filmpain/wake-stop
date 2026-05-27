@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bell, Vibrate, Volume2, Moon, Sun, Play, Trash2, AlertTriangle } from 'lucide-react';
 import { useSettings } from '@/lib/useSettings';
 import { useTheme } from '@/lib/ThemeContext';
-import { SOUND_OPTIONS, HAPTIC_OPTIONS, triggerAlert } from '@/lib/alerts';
+import { SOUND_OPTIONS, HAPTIC_OPTIONS, triggerAlert, vibrate, isVibrationSupported } from '@/lib/alerts';
+import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
 import {
   AlertDialog,
@@ -21,6 +22,7 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const { settings, update, loaded } = useSettings();
   const { theme, setMode } = useTheme();
+  const { toast } = useToast();
 
   if (!loaded) {
     return <div className="p-6 text-muted-foreground">Loading…</div>;
@@ -28,6 +30,24 @@ export default function SettingsPage() {
 
   const testAlert = () => {
     triggerAlert(settings);
+    if (settings.alert_type === 'haptic' || settings.alert_type === 'both') {
+      if (!isVibrationSupported()) {
+        toast({
+          title: 'Vibration not supported',
+          description: 'This device or WebView does not expose the vibration API.',
+          variant: 'destructive',
+        });
+      } else {
+        const ok = vibrate(settings.haptic_pattern);
+        if (!ok) {
+          toast({
+            title: 'Vibration was blocked',
+            description: 'Check that vibration is enabled in your phone settings (Sound & Vibration → Vibrate for notifications).',
+            variant: 'destructive',
+          });
+        }
+      }
+    }
   };
 
   const handleDeleteAccount = async () => {

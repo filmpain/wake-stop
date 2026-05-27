@@ -58,18 +58,29 @@ export function playSound(soundName, volume = 0.8) {
   }
 }
 
+export function isVibrationSupported() {
+  return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+}
+
 export function vibrate(pattern) {
-  if (typeof navigator === 'undefined' || !navigator.vibrate) return false;
+  if (!isVibrationSupported()) {
+    console.warn('[haptic] navigator.vibrate not available in this WebView/browser');
+    return false;
+  }
   const patterns = {
-    gentle: [200],
-    strong: [600],
-    escalating: [200, 100, 300, 100, 500, 100, 800],
+    gentle: [300],
+    strong: [800],
+    escalating: [300, 150, 400, 150, 600, 150, 900],
     sos: [200, 100, 200, 100, 200, 300, 600, 100, 600, 100, 600, 300, 200, 100, 200, 100, 200],
   };
   try {
-    navigator.vibrate(patterns[pattern] || patterns.escalating);
-    return true;
+    // Cancel anything currently running so a new call always fires.
+    navigator.vibrate(0);
+    const ok = navigator.vibrate(patterns[pattern] || patterns.escalating);
+    if (!ok) console.warn('[haptic] navigator.vibrate returned false (blocked or disabled)');
+    return ok;
   } catch (e) {
+    console.warn('[haptic] vibrate threw', e);
     return false;
   }
 }
