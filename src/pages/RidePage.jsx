@@ -6,8 +6,9 @@ import { base44 } from '@/api/base44Client';
 import { findStopById } from '@/lib/gtfsData';
 import { useGeoLocation } from '@/lib/useGeoLocation';
 import { useSettings } from '@/lib/useSettings';
+import { useWakeLock } from '@/lib/useWakeLock';
 import { haversineMeters, metersToStops, formatDistance } from '@/lib/distance';
-import { triggerAlert } from '@/lib/alerts';
+import { triggerAlert, unlockAudio } from '@/lib/alerts';
 import RideMap from '@/components/RideMap';
 import RouteBadge from '@/components/RouteBadge';
 import WakeAlert from '@/components/WakeAlert';
@@ -33,6 +34,15 @@ export default function RidePage() {
   const [alertTriggered, setAlertTriggered] = useState(false);
   const sessionIdRef = useRef(null);
   const alertFiredRef = useRef(false);
+
+  // Keep the screen awake during the ride so GPS keeps updating.
+  useWakeLock(!!favStop && !alertTriggered);
+
+  // Unlock the audio context while we still have the arming gesture, so the
+  // GPS-triggered alert can actually play sound on mobile.
+  useEffect(() => {
+    unlockAudio();
+  }, []);
 
   // Create/reuse RideSession on mount. Reuses an active session for the same
   // stop if one exists, and cancels any other stale active sessions to keep
@@ -129,6 +139,7 @@ export default function RidePage() {
       <WakeAlert
         stopName={favStop.stop_name}
         routes={favStop.routes}
+        settings={settings}
         onDismiss={handleDismissAlert}
       />
     );

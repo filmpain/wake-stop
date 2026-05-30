@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell } from 'lucide-react';
 import RouteBadge from './RouteBadge';
-import { useSettings } from '@/lib/useSettings';
 import { triggerAlert } from '@/lib/alerts';
 
-export default function WakeAlert({ stopName, routes, onDismiss }) {
-  const { settings } = useSettings();
-
-  // Re-trigger alert every 3 seconds until dismissed
+export default function WakeAlert({ stopName, routes, settings, onDismiss }) {
+  // Re-trigger alert every 3 seconds until dismissed. The FIRST alert is fired
+  // by RidePage when it detects the stop, so we wait 3s before the first repeat
+  // here to avoid a double-buzz.
   useEffect(() => {
+    if (!settings) return;
     const id = setInterval(() => {
       triggerAlert(settings);
     }, 3000);

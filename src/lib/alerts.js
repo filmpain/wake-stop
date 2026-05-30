@@ -25,6 +25,23 @@ function playTone({ freq, duration, type = 'sine', volume = 0.8, delay = 0 }) {
   osc.stop(ctx.currentTime + delay + duration + 0.05);
 }
 
+// Call this from a user gesture (e.g. tapping "Arm") so the AudioContext is
+// allowed to produce sound later from a non-gesture callback (the GPS alert).
+export function unlockAudio() {
+  const ctx = getCtx();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume();
+  // Play a near-silent blip to fully "unlock" on iOS/Android.
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.value = 0.0001;
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.02);
+  } catch (e) { /* ignore */ }
+}
+
 export function playSound(soundName, volume = 0.8) {
   const ctx = getCtx();
   if (!ctx) return;
