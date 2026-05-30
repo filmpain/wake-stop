@@ -45,7 +45,7 @@ export default function SearchPage() {
       {/* Header */}
       <div className="flex items-center gap-3 pt-4 pb-4">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center"
           aria-label="Back"
         >
