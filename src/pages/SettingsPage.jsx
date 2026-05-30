@@ -212,6 +212,13 @@ export default function SettingsPage() {
         >
           Privacy Policy
         </button>
+        <span className="mx-2">·</span>
+        <button
+          onClick={() => navigate('/support')}
+          className="underline text-muted-foreground hover:text-foreground"
+        >
+          Support
+        </button>
       </div>
     </div>
   );

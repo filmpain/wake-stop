@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/lib/ThemeContext';
 import Layout from '@/components/Layout';
 import RidePage from '@/pages/RidePage';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import Support from '@/pages/Support';
 
 const PageWrap = ({ children }) => (
   <motion.div
@@ -39,6 +40,7 @@ const AnimatedRoutes = () => {
         </Route>
         <Route path="/ride/:stopId" element={<PageWrap><RidePage /></PageWrap>} />
         <Route path="/privacy" element={<PageWrap><PrivacyPolicy /></PageWrap>} />
+        <Route path="/support" element={<PageWrap><Support /></PageWrap>} />
         <Route path="*" element={<PageWrap><PageNotFound /></PageWrap>} />
       </Routes>
     </AnimatePresence>
