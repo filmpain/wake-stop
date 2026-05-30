@@ -205,6 +205,13 @@ export default function SettingsPage() {
       <div className="mt-8 text-center text-xs text-muted-foreground">
         Wake Stop · NYC MTA GTFS data<br />
         For best results, keep the app open during your ride.
+        <br />
+        <button
+          onClick={() => navigate('/privacy')}
+          className="mt-2 underline text-muted-foreground hover:text-foreground"
+        >
+          Privacy Policy
+        </button>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import Layout from '@/components/Layout';
 import RidePage from '@/pages/RidePage';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 
 const PageWrap = ({ children }) => (
   <motion.div
@@ -37,6 +38,7 @@ const AnimatedRoutes = () => {
           <Route path="/settings" element={null} />
         </Route>
         <Route path="/ride/:stopId" element={<PageWrap><RidePage /></PageWrap>} />
+        <Route path="/privacy" element={<PageWrap><PrivacyPolicy /></PageWrap>} />
         <Route path="*" element={<PageWrap><PageNotFound /></PageWrap>} />
       </Routes>
     </AnimatePresence>
