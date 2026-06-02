@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import BottomNav from './BottomNav';
+import PermissionPrompt from './PermissionPrompt';
 import Home from '@/pages/Home';
 import SearchPage from '@/pages/SearchPage';
 import SettingsPage from '@/pages/SettingsPage';
@@ -58,6 +59,7 @@ export default function Layout() {
         })}
       </div>
       <BottomNav />
+      <PermissionPrompt />
     </div>
   );
 }
