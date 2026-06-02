@@ -50,7 +50,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="px-5 pt-[env(safe-area-inset-top)] pb-6">
+    <div className="px-5 pt-[env(safe-area-inset-top)] pb-32">
       {/* Header */}
       <div className="flex items-center gap-3 pt-4 pb-4">
         <button
