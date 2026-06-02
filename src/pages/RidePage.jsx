@@ -14,6 +14,7 @@ import RouteBadge from '@/components/RouteBadge';
 import WakeAlert from '@/components/WakeAlert';
 import ServiceAlertBanner from '@/components/ServiceAlertBanner';
 import { useServiceAlerts } from '@/lib/useServiceAlerts';
+import { filterAlertsToSegment } from '@/lib/segmentAlerts';
 
 export default function RidePage() {
   const { stopId } = useParams();
@@ -33,7 +34,13 @@ export default function RidePage() {
 
   const { settings, loaded } = useSettings();
   const { position, error: locError, permissionState } = useGeoLocation(true);
-  const { alerts: serviceAlerts } = useServiceAlerts(favStop?.routes);
+  const { alerts: rawAlerts } = useServiceAlerts(favStop?.routes);
+
+  // Only surface alerts affecting the segment between the rider's GPS and destination.
+  const serviceAlerts = useMemo(
+    () => filterAlertsToSegment(rawAlerts, position, favStop),
+    [rawAlerts, position, favStop]
+  );
   const [alertTriggered, setAlertTriggered] = useState(false);
   const sessionIdRef = useRef(null);
   const alertFiredRef = useRef(false);

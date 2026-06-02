@@ -72,11 +72,18 @@ Deno.serve(async (req) => {
         .filter(Boolean)
         .map((r) => String(r).toUpperCase());
 
+      // Specific stops affected by this alert (used for segment filtering on the client)
+      const stopIds = (alert.informed_entity || [])
+        .map((ie) => ie.stop_id)
+        .filter(Boolean)
+        .map((s) => String(s));
+
       alerts.push({
         id: entity.id || '',
         header: text(alert.header_text),
         description: text(alert.description_text),
         routes: [...new Set(affected)],
+        stop_ids: [...new Set(stopIds)],
       });
     }
 
