@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Train, Bus, ChevronRight, Check } from 'lucide-react';
+import { Star, Train, Bus, ChevronRight, Check, Bell } from 'lucide-react';
 import RouteBadge from './RouteBadge';
 
-export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, onToggleArm, isArmed, action = 'chevron' }) {
+export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, onToggleArm, isArmed, onArm, action = 'chevron' }) {
   const Icon = stop.stop_type === 'subway' ? Train : Bus;
 
   return (
@@ -33,15 +33,25 @@ export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, on
           </div>
         </div>
         {action === 'favorite' ? (
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(stop); }}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary"
-            aria-label="Toggle favorite"
-          >
-            <Star
-              className={`w-5 h-5 ${isFavorite ? 'fill-accent text-accent' : 'text-muted-foreground'}`}
-            />
-          </button>
+          <div className="flex items-center gap-2 self-center">
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleFavorite?.(stop); }}
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary"
+              aria-label="Toggle favorite"
+            >
+              <Star
+                className={`w-5 h-5 ${isFavorite ? 'fill-accent text-accent' : 'text-muted-foreground'}`}
+              />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onArm?.(stop); }}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-primary text-primary-foreground text-xs font-bold"
+              aria-label="Arm alarm"
+            >
+              <Bell className="w-4 h-4" />
+              Alarm
+            </button>
+          </div>
         ) : action === 'arm' ? (
           <div className="flex items-center gap-2 self-center">
             <button

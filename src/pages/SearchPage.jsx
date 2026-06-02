@@ -38,8 +38,8 @@ export default function SearchPage() {
     }
   };
 
-  const handleTap = (stop) => {
-    // Don't auto-arm — open the confirmation sheet so the user arms explicitly.
+  const handleArm = (stop) => {
+    // Only arm when the user explicitly taps the Alarm button.
     setPendingStop(stop);
   };
 
@@ -109,7 +109,7 @@ export default function SearchPage() {
           <StopCard
             key={`${stop.stop_type}-${stop.stop_id}`}
             stop={stop}
-            onTap={handleTap}
+            onArm={handleArm}
             onToggleFavorite={toggleFavorite}
             isFavorite={favIds.has(stop.stop_id)}
             action="favorite"
