@@ -50,9 +50,8 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    // Wipe the user's data, then log them out. Their User record persists
-    // (only admins can delete users), but all personal data is removed.
+  const handleClearData = async () => {
+    // Wipe the user's personal data — favorites, ride history, and preferences.
     const [favs, sessions, settingsRows] = await Promise.all([
       base44.entities.FavoriteStop.list(),
       base44.entities.RideSession.list(),
@@ -63,7 +62,8 @@ export default function SettingsPage() {
       ...sessions.map((s) => base44.entities.RideSession.delete(s.id)),
       ...settingsRows.map((s) => base44.entities.UserSettings.delete(s.id)),
     ]);
-    base44.auth.logout();
+    toast({ title: 'All data cleared' });
+    navigate('/');
   };
 
   return (
@@ -170,31 +170,31 @@ export default function SettingsPage() {
       {/* Danger zone */}
       <Section title="Danger Zone" icon={AlertTriangle}>
         <div className="border-2 border-destructive/30 rounded-2xl p-4 bg-destructive/5">
-          <div className="font-semibold text-sm mb-1">Delete account</div>
+          <div className="font-semibold text-sm mb-1">Clear all data</div>
           <div className="text-xs text-muted-foreground mb-3">
-            Permanently removes your favorites, ride history, and preferences. You'll be signed out.
+            Permanently removes your favorite stops, ride history, and preferences.
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button className="w-full h-11 rounded-xl bg-destructive text-destructive-foreground font-bold flex items-center justify-center gap-2">
                 <Trash2 className="w-4 h-4" />
-                Delete account
+                Clear all data
               </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogTitle>Clear all data?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete your favorites, ride sessions, and settings, then sign you out. This action cannot be undone.
+                  This will permanently delete your favorite stops, ride history, and preferences. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  onClick={handleDeleteAccount}
+                  onClick={handleClearData}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 >
-                  Yes, delete everything
+                  Yes, clear everything
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
