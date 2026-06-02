@@ -31,9 +31,9 @@ export default function Layout() {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen text-foreground bg-transparent">
       <AppBackground />
-      <div className="max-w-md mx-auto pb-20 relative">
+      <div className="max-w-md mx-auto pb-20 relative z-10">
         {TABS.map(({ path, Component }) => {
           const active = pathname === path;
           return (

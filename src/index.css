@@ -61,7 +61,8 @@
   }
 
   html, body, #root {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: hsl(var(--background));
     font-family: var(--font-inter);
     -webkit-font-smoothing: antialiased;
     overscroll-behavior-y: none;

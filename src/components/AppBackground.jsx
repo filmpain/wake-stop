@@ -11,15 +11,15 @@ export default function AppBackground() {
   const src = theme === 'dark' ? DARK_BG : LIGHT_BG;
 
   return (
-    <div className="fixed inset-0 -z-10 pointer-events-none">
+    <div className="fixed inset-0 z-0 pointer-events-none">
       <img
         src={src}
         alt=""
         className="w-full h-full object-cover"
-        style={{ opacity: theme === 'dark' ? 0.35 : 0.5 }}
+        style={{ opacity: theme === 'dark' ? 0.55 : 0.65 }}
       />
-      {/* Gradient veil to keep foreground content legible */}
-      <div className="absolute inset-0 bg-background/70" />
+      {/* Light veil to keep foreground content legible */}
+      <div className="absolute inset-0 bg-background/40" />
     </div>
   );
 }
