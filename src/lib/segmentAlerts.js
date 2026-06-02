@@ -18,12 +18,16 @@ export function filterAlertsToSegment(alerts, position, destination) {
     lat >= minLat && lat <= maxLat && lon >= minLon && lon <= maxLon;
 
   return alerts.filter((alert) => {
-    const stops = (alert.stop_ids || [])
-      .map((id) => findStopById(id))
-      .filter(Boolean);
+    const stopIds = alert.stop_ids || [];
 
-    // No known stop coords → can't segment-filter, keep it (route-level alert).
-    if (stops.length === 0) return true;
+    // Truly route-level alert (no specific stops) → keep, it affects the whole line.
+    if (stopIds.length === 0) return true;
+
+    const stops = stopIds.map((id) => findStopById(id)).filter(Boolean);
+
+    // Alert targets specific stops but none resolve to coordinates → we can't
+    // confirm it's on this segment, so drop it to avoid noise.
+    if (stops.length === 0) return false;
 
     // Keep only if at least one affected stop is within the ride segment.
     return stops.some((s) => inBox(s.stop_lat, s.stop_lon));
