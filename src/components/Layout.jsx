@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import BottomNav from './BottomNav';
 import PermissionPrompt from './PermissionPrompt';
+import AppBackground from './AppBackground';
 import Home from '@/pages/Home';
 import SearchPage from '@/pages/SearchPage';
 import SettingsPage from '@/pages/SettingsPage';
@@ -30,7 +31,8 @@ export default function Layout() {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
+      <AppBackground />
       <div className="max-w-md mx-auto pb-20 relative">
         {TABS.map(({ path, Component }) => {
           const active = pathname === path;
