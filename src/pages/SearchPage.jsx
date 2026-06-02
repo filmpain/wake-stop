@@ -4,11 +4,13 @@ import { ArrowLeft, Search, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { searchStops } from '@/lib/gtfsData';
 import StopCard from '@/components/StopCard';
+import ArmConfirmSheet from '@/components/ArmConfirmSheet';
 
 export default function SearchPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [favorites, setFavorites] = useState([]);
+  const [pendingStop, setPendingStop] = useState(null);
 
   useEffect(() => {
     base44.entities.FavoriteStop.list('sort_order', 100).then(setFavorites);
@@ -37,6 +39,13 @@ export default function SearchPage() {
   };
 
   const handleTap = (stop) => {
+    // Don't auto-arm — open the confirmation sheet so the user arms explicitly.
+    setPendingStop(stop);
+  };
+
+  const handleConfirmArm = () => {
+    const stop = pendingStop;
+    setPendingStop(null);
     navigate(`/ride/${encodeURIComponent(stop.stop_id)}`);
   };
 
@@ -107,6 +116,13 @@ export default function SearchPage() {
           />
         ))}
       </div>
+
+      <ArmConfirmSheet
+        stop={pendingStop}
+        open={!!pendingStop}
+        onClose={() => setPendingStop(null)}
+        onConfirm={handleConfirmArm}
+      />
     </div>
   );
 }
