@@ -12,6 +12,8 @@ import { triggerAlert, unlockAudio } from '@/lib/alerts';
 import RideMap from '@/components/RideMap';
 import RouteBadge from '@/components/RouteBadge';
 import WakeAlert from '@/components/WakeAlert';
+import ServiceAlertBanner from '@/components/ServiceAlertBanner';
+import { useServiceAlerts } from '@/lib/useServiceAlerts';
 
 export default function RidePage() {
   const { stopId } = useParams();
@@ -31,6 +33,7 @@ export default function RidePage() {
 
   const { settings, loaded } = useSettings();
   const { position, error: locError, permissionState } = useGeoLocation(true);
+  const { alerts: serviceAlerts } = useServiceAlerts(favStop?.routes);
   const [alertTriggered, setAlertTriggered] = useState(false);
   const sessionIdRef = useRef(null);
   const alertFiredRef = useRef(false);
@@ -166,6 +169,9 @@ export default function RidePage() {
           {(favStop.routes || []).map(r => <RouteBadge key={r} route={r} size="sm" />)}
         </div>
       </div>
+
+      {/* Service alerts for this route */}
+      <ServiceAlertBanner alerts={serviceAlerts} />
 
       {/* Big countdown */}
       <Countdown
