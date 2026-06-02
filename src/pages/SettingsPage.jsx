@@ -203,7 +203,7 @@ export default function SettingsPage() {
       </Section>
 
       <div className="mt-8 text-center text-xs text-muted-foreground">
-        Wake Stop · NYC MTA GTFS data<br />
+        Wake Stop NYC · NYC MTA GTFS data<br />
         For best results, keep the app open during your ride.
         <br />
         <button
