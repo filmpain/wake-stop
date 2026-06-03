@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, X } from 'lucide-react';
 import RouteBadge from './RouteBadge';
 
 export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
+  // Hide the bottom nav while the sheet is open so the action button is reachable.
+  useEffect(() => {
+    if (open) document.body.classList.add('sheet-open');
+    else document.body.classList.remove('sheet-open');
+    return () => document.body.classList.remove('sheet-open');
+  }, [open]);
+
   return (
     <AnimatePresence>
       {open && stop && (
@@ -13,14 +20,14 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 z-40"
+            className="fixed inset-0 bg-black/60 z-[55]"
           />
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-3xl p-6 pb-[calc(4rem+env(safe-area-inset-bottom)+1.5rem)] max-w-md mx-auto max-h-[80vh] overflow-y-auto"
+            className="fixed bottom-0 left-0 right-0 z-[60] bg-card border-t border-border rounded-t-3xl p-6 pb-[max(env(safe-area-inset-bottom),1.5rem)] max-w-md mx-auto max-h-[85vh] overflow-y-auto"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
