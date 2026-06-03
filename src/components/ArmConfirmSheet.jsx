@@ -20,7 +20,7 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 bg-card border-t border-border rounded-t-3xl p-6 max-w-md mx-auto max-h-[75vh] overflow-y-auto"
+            className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border rounded-t-3xl p-6 pb-[calc(4rem+env(safe-area-inset-bottom)+1.5rem)] max-w-md mx-auto max-h-[80vh] overflow-y-auto"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
