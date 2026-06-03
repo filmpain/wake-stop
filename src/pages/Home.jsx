@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Plus, Moon, Sun, Zap } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -12,6 +12,7 @@ import PullToRefresh from '@/components/PullToRefresh';
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,11 @@ export default function Home() {
     setLoading(false);
   };
 
-  useEffect(() => { loadData(); }, []);
+  // Reload whenever the Home tab becomes active so a stop armed from the
+  // Search tab (which stays mounted) immediately shows up here.
+  useEffect(() => {
+    if (location.pathname === '/') loadData();
+  }, [location.pathname]);
 
   const handleTap = (stop) => {
     // Tapping the card body opens details/ride view if armed, otherwise the arm sheet

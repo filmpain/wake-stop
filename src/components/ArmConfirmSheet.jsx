@@ -18,13 +18,18 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
   // Android back gesture / button should close the sheet, not navigate away.
   useEffect(() => {
     if (!open) return;
+    let closedByBack = false;
     window.history.pushState({ sheet: true }, '');
-    const onPop = () => onClose?.();
+    const onPop = () => {
+      closedByBack = true;
+      onClose?.();
+    };
     window.addEventListener('popstate', onPop);
     return () => {
       window.removeEventListener('popstate', onPop);
-      // If the sheet was closed by a button (not by back), clean up the history entry.
-      if (window.history.state?.sheet) {
+      // If the sheet was closed via a button (not the back gesture), pop the
+      // history entry we added so the back stack stays clean.
+      if (!closedByBack && window.history.state?.sheet) {
         window.history.back();
       }
     };
@@ -46,8 +51,9 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-[101] bg-card border-t border-border rounded-t-3xl px-6 pt-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] max-w-md mx-auto max-h-[85vh] overflow-y-auto"
+            className="fixed bottom-0 left-0 right-0 z-[101] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] max-w-md mx-auto max-h-[85vh] overflow-y-auto"
           >
+            <div className="w-12 h-1.5 rounded-full bg-border mx-auto mb-5" />
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Arm alarm for</div>
