@@ -29,11 +29,25 @@ export default function Home() {
     setLoading(false);
   };
 
-  // Reload whenever the Home tab becomes active so a stop armed from the
-  // Search tab (which stays mounted) immediately shows up here.
+  // Reload whenever the Home tab becomes active so a stop armed elsewhere
+  // (Search tab, or the Ride page) immediately shows up here.
   useEffect(() => {
     if (location.pathname === '/') loadData();
   }, [location.pathname]);
+
+  // Also refresh when the app/tab regains focus (e.g. returning from the
+  // Ride page via the back gesture).
+  useEffect(() => {
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') loadData();
+    };
+    document.addEventListener('visibilitychange', onFocus);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onFocus);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
 
   const handleTap = (stop) => {
     // Tapping the card body opens details/ride view if armed, otherwise the arm sheet

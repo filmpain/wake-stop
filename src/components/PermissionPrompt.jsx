@@ -19,6 +19,16 @@ export default function PermissionPrompt() {
     unlockAudio();
     if (isVibrationSupported()) vibrate('gentle');
 
+    // Trigger the OS-level location prompt now (while we have a user gesture).
+    // This is the key permission the app needs to detect your stop.
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => {},
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
     // Request system notification permission (if available).
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       try { await Notification.requestPermission(); } catch (e) { /* ignore */ }
