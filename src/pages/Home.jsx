@@ -20,23 +20,42 @@ export default function Home() {
   const [pendingStop, setPendingStop] = useState(null);
 
   const loadData = async () => {
-    const [rows, sessions] = await Promise.all([
-      base44.entities.FavoriteStop.list('sort_order', 50),
-      base44.entities.RideSession.filter({ status: 'active' }, '-created_date', 1),
-    ]);
+    const rows = await base44.entities.FavoriteStop.list('sort_order', 50);
     setFavorites(rows);
-    setActiveSession(sessions[0] || null);
     setLoading(false);
   };
 
-  // Reload whenever the Home tab becomes active so a stop armed elsewhere
-  // (Search tab, or the Ride page) immediately shows up here.
+  // Real-time subscription to active sessions ensures the Home tab immediately
+  // updates when a session is armed or disarmed anywhere in the app.
+  useEffect(() => {
+    // Initial fetch
+    base44.entities.RideSession.filter({ status: 'active' }, '-created_date', 1)
+      .then(sessions => setActiveSession(sessions[0] || null));
+
+    // Listen for any changes to RideSessions in real-time
+    const unsubscribe = base44.entities.RideSession.subscribe((event) => {
+      if (event.type === 'create' && event.data.status === 'active') {
+        setActiveSession(event.data);
+      } else if (event.type === 'update') {
+        if (event.data.status === 'active') {
+          setActiveSession(event.data);
+        } else if (activeSession && event.id === activeSession.id && event.data.status !== 'active') {
+          setActiveSession(null);
+        }
+      } else if (event.type === 'delete' && activeSession && event.id === activeSession.id) {
+        setActiveSession(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [activeSession]);
+
+  // Reload static data when the Home tab becomes active
   useEffect(() => {
     if (location.pathname === '/') loadData();
   }, [location.pathname]);
 
-  // Also refresh when the app/tab regains focus (e.g. returning from the
-  // Ride page via the back gesture).
+  // Refresh static data when the app regains focus
   useEffect(() => {
     const onFocus = () => {
       if (document.visibilityState === 'visible') loadData();

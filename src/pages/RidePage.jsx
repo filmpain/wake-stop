@@ -59,33 +59,45 @@ export default function RidePage() {
   // the "armed" state consistent.
   useEffect(() => {
     if (!favStop || sessionIdRef.current) return;
+    let isMounted = true;
     (async () => {
-      const active = await base44.entities.RideSession.filter({ status: 'active' });
-      const matching = active.find((s) => s.destination_stop_id === favStop.stop_id);
-      // Cancel any other stale active sessions
-      await Promise.all(
-        active
-          .filter((s) => s.id !== matching?.id)
-          .map((s) => base44.entities.RideSession.update(s.id, {
-            status: 'cancelled',
-            ended_at: new Date().toISOString(),
-          }))
-      );
-      if (matching) {
-        sessionIdRef.current = matching.id;
-        return;
+      try {
+        const active = await base44.entities.RideSession.filter({ status: 'active' });
+        const matching = active.find((s) => s.destination_stop_id === favStop.stop_id);
+        
+        // Cancel any other stale active sessions
+        await Promise.all(
+          active
+            .filter((s) => s.id !== matching?.id)
+            .map((s) => base44.entities.RideSession.update(s.id, {
+              status: 'cancelled',
+              ended_at: new Date().toISOString(),
+            }))
+        );
+        
+        if (!isMounted) return;
+
+        if (matching) {
+          sessionIdRef.current = matching.id;
+          return;
+        }
+        
+        const created = await base44.entities.RideSession.create({
+          destination_stop_id: favStop.stop_id,
+          destination_stop_name: favStop.stop_name,
+          destination_stop_type: favStop.stop_type,
+          destination_lat: favStop.stop_lat,
+          destination_lon: favStop.stop_lon,
+          started_at: new Date().toISOString(),
+          status: 'active',
+        });
+        
+        if (isMounted) sessionIdRef.current = created.id;
+      } catch (err) {
+        console.error("Failed to arm session:", err);
       }
-      const created = await base44.entities.RideSession.create({
-        destination_stop_id: favStop.stop_id,
-        destination_stop_name: favStop.stop_name,
-        destination_stop_type: favStop.stop_type,
-        destination_lat: favStop.stop_lat,
-        destination_lon: favStop.stop_lon,
-        started_at: new Date().toISOString(),
-        status: 'active',
-      });
-      sessionIdRef.current = created.id;
     })();
+    return () => { isMounted = false; };
   }, [favStop]);
 
   // Distance + stops away

@@ -20,13 +20,24 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
     if (!open) return;
     let closedByBack = false;
     window.history.pushState({ sheet: true }, '');
+    
     const onPop = () => {
       closedByBack = true;
       onClose?.();
     };
+    
+    // Native app wrapper back button support
+    const onNativeBack = (e) => {
+      e.preventDefault();
+      onClose?.();
+    };
+
     window.addEventListener('popstate', onPop);
+    document.addEventListener('backbutton', onNativeBack, false);
+
     return () => {
       window.removeEventListener('popstate', onPop);
+      document.removeEventListener('backbutton', onNativeBack, false);
       // If the sheet was closed via a button (not the back gesture), pop the
       // history entry we added so the back stack stays clean.
       if (!closedByBack && window.history.state?.sheet) {
@@ -46,14 +57,14 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
             onClick={onClose}
             className="fixed inset-0 bg-black/60 z-[100]"
           />
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
           <motion.div
-            initial={{ scale: 0.92, opacity: 0, y: 16 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.92, opacity: 0, y: 16 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="pointer-events-auto w-full max-w-sm bg-card border border-border rounded-3xl px-6 pt-6 pb-6 max-h-[85vh] overflow-y-auto shadow-2xl"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed bottom-0 left-0 right-0 z-[101] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+5rem)] max-w-md mx-auto max-h-[85vh] overflow-y-auto"
           >
+            <div className="w-12 h-1.5 rounded-full bg-border mx-auto mb-5" />
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Arm alarm for</div>
@@ -82,7 +93,6 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
               Arm alarm
             </button>
           </motion.div>
-          </div>
         </>
       )}
     </AnimatePresence>,
