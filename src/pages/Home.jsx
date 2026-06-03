@@ -34,17 +34,31 @@ export default function Home() {
     setLoading(false);
   };
 
-  // Real-time subscription to active sessions ensures the Home tab immediately
-  // updates when a session is armed or disarmed anywhere in the app.
+  // Real-time subscription to active sessions without repeated API calls.
   useEffect(() => {
-    const refreshActiveSession = async () => {
-      const sessions = await base44.entities.RideSession.filter({ status: 'active' }, '-created_date', 1);
-      setActiveSession(sessions[0] || null);
-    };
+    let mounted = true;
 
-    refreshActiveSession();
-    const unsubscribe = base44.entities.RideSession.subscribe(refreshActiveSession);
-    return unsubscribe;
+    base44.entities.RideSession.filter({ status: 'active' }, '-created_date', 1)
+      .then((sessions) => {
+        if (mounted) setActiveSession(sessions[0] || null);
+      });
+
+    const unsubscribe = base44.entities.RideSession.subscribe((event) => {
+      setActiveSession((current) => {
+        if (event.type === 'create' && event.data?.status === 'active') return event.data;
+        if (event.type === 'update') {
+          if (event.data?.status === 'active') return event.data;
+          if (current?.id === event.id) return null;
+        }
+        if (event.type === 'delete' && current?.id === event.id) return null;
+        return current;
+      });
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe?.();
+    };
   }, []);
 
   // Reload static data when the Home tab becomes active
