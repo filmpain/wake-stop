@@ -5,14 +5,16 @@ import { Zap, X } from 'lucide-react';
 import RouteBadge from './RouteBadge';
 
 export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
-  // Hide the bottom nav + lock scroll while the sheet is open.
+  // Hide bottom nav and lock background scroll while the sheet is open.
   useEffect(() => {
-    if (open) {
-      document.body.classList.add('sheet-open');
-    } else {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.classList.add('sheet-open');
+    document.body.style.overflow = 'hidden';
+    return () => {
       document.body.classList.remove('sheet-open');
-    }
-    return () => document.body.classList.remove('sheet-open');
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   // Android back gesture / button should close the sheet, not navigate away.
@@ -29,6 +31,7 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
     // Native app wrapper back button support
     const onNativeBack = (e) => {
       e.preventDefault();
+      closedByBack = true;
       onClose?.();
     };
 
@@ -62,7 +65,7 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-[101] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+5rem)] max-w-md mx-auto max-h-[85vh] overflow-y-auto"
+            className="fixed bottom-0 left-0 right-0 z-[200] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+6rem)] max-w-md mx-auto max-h-[82vh] overflow-y-auto shadow-2xl"
           >
             <div className="w-12 h-1.5 rounded-full bg-border mx-auto mb-5" />
             <div className="flex items-start justify-between mb-4">

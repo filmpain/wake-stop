@@ -19,6 +19,15 @@ export default function Home() {
   const [activeSession, setActiveSession] = useState(null);
   const [pendingStop, setPendingStop] = useState(null);
 
+  const activeAlertStop = activeSession ? {
+    stop_id: activeSession.destination_stop_id,
+    stop_name: activeSession.destination_stop_name,
+    stop_type: activeSession.destination_stop_type,
+    routes: activeSession.route_id ? [activeSession.route_id] : [],
+    stop_lat: activeSession.destination_lat,
+    stop_lon: activeSession.destination_lon,
+  } : null;
+
   const loadData = async () => {
     const rows = await base44.entities.FavoriteStop.list('sort_order', 50);
     setFavorites(rows);
@@ -28,27 +37,15 @@ export default function Home() {
   // Real-time subscription to active sessions ensures the Home tab immediately
   // updates when a session is armed or disarmed anywhere in the app.
   useEffect(() => {
-    // Initial fetch
-    base44.entities.RideSession.filter({ status: 'active' }, '-created_date', 1)
-      .then(sessions => setActiveSession(sessions[0] || null));
+    const refreshActiveSession = async () => {
+      const sessions = await base44.entities.RideSession.filter({ status: 'active' }, '-created_date', 1);
+      setActiveSession(sessions[0] || null);
+    };
 
-    // Listen for any changes to RideSessions in real-time
-    const unsubscribe = base44.entities.RideSession.subscribe((event) => {
-      if (event.type === 'create' && event.data.status === 'active') {
-        setActiveSession(event.data);
-      } else if (event.type === 'update') {
-        if (event.data.status === 'active') {
-          setActiveSession(event.data);
-        } else if (activeSession && event.id === activeSession.id && event.data.status !== 'active') {
-          setActiveSession(null);
-        }
-      } else if (event.type === 'delete' && activeSession && event.id === activeSession.id) {
-        setActiveSession(null);
-      }
-    });
-
+    refreshActiveSession();
+    const unsubscribe = base44.entities.RideSession.subscribe(refreshActiveSession);
     return unsubscribe;
-  }, [activeSession]);
+  }, []);
 
   // Reload static data when the Home tab becomes active
   useEffect(() => {
@@ -84,11 +81,23 @@ export default function Home() {
   };
 
   const handleToggleFavorite = async (stop) => {
-    // On Home, every shown stop is already a favorite — tapping the star removes it.
-    if (stop.id) {
-      await base44.entities.FavoriteStop.delete(stop.id);
-      setFavorites((prev) => prev.filter((f) => f.id !== stop.id));
+    const existing = favorites.find((fav) => fav.stop_id === stop.stop_id);
+    if (existing) {
+      await base44.entities.FavoriteStop.delete(existing.id);
+      setFavorites((prev) => prev.filter((f) => f.id !== existing.id));
+      return;
     }
+
+    const created = await base44.entities.FavoriteStop.create({
+      stop_id: stop.stop_id,
+      stop_name: stop.stop_name,
+      stop_type: stop.stop_type,
+      routes: stop.routes || [],
+      stop_lat: stop.stop_lat,
+      stop_lon: stop.stop_lon,
+      sort_order: favorites.length,
+    });
+    setFavorites((prev) => [...prev, created]);
   };
 
   const handleToggleArm = async (stop) => {
@@ -144,6 +153,25 @@ export default function Home() {
         <Search className="w-5 h-5 text-muted-foreground" />
         <span className="text-muted-foreground">Search stops, routes…</span>
       </button>
+
+      {/* Active alert stop — shown even when it is not a favorite */}
+      {activeAlertStop && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-green-600 dark:text-green-500">Active Alert</h2>
+            <span className="text-xs text-green-600 dark:text-green-500 font-semibold">Armed</span>
+          </div>
+          <StopCard
+            stop={activeAlertStop}
+            onTap={handleTap}
+            action="arm"
+            isArmed={true}
+            onToggleArm={handleToggleArm}
+            isFavorite={favorites.some((fav) => fav.stop_id === activeAlertStop.stop_id)}
+            onToggleFavorite={handleToggleFavorite}
+          />
+        </div>
+      )}
 
       {/* Favorites */}
       <PullToRefresh onRefresh={loadData}>

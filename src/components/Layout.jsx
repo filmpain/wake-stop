@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import BottomNav from './BottomNav';
 import PermissionPrompt from './PermissionPrompt';
@@ -17,6 +17,7 @@ const TABS = [
 
 export default function Layout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const scrollPositions = useRef({});
   const prevPath = useRef(pathname);
 
@@ -29,6 +30,19 @@ export default function Layout() {
     window.scrollTo(0, restoreY);
     prevPath.current = pathname;
   }, [pathname]);
+
+  // Android/iOS native wrapper back button: go Home from tabs before exiting.
+  useEffect(() => {
+    const handleNativeBack = (event) => {
+      if (document.body.classList.contains('sheet-open')) return;
+      if (pathname !== '/') {
+        event.preventDefault();
+        navigate('/');
+      }
+    };
+    document.addEventListener('backbutton', handleNativeBack, false);
+    return () => document.removeEventListener('backbutton', handleNativeBack, false);
+  }, [pathname, navigate]);
 
   return (
     <div className="min-h-screen text-foreground bg-transparent">

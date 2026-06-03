@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Vibrate, Volume2 } from 'lucide-react';
+import { Bell, MapPin, Smartphone, Vibrate, Volume2 } from 'lucide-react';
 import { unlockAudio, vibrate, isVibrationSupported } from '@/lib/alerts';
 
 const STORAGE_KEY = 'wakestop_permissions_prompted';
@@ -9,8 +9,17 @@ export default function PermissionPrompt() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
+    const shouldAskNotifications = typeof Notification !== 'undefined' && Notification.permission === 'default';
+
+    if (!localStorage.getItem(STORAGE_KEY) || shouldAskNotifications) {
       setShow(true);
+      return;
+    }
+
+    if (navigator?.permissions?.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+        if (status.state !== 'granted') setShow(true);
+      });
     }
   }, []);
 
@@ -19,17 +28,18 @@ export default function PermissionPrompt() {
     unlockAudio();
     if (isVibrationSupported()) vibrate('gentle');
 
-    // Trigger the OS-level location prompt now (while we have a user gesture).
-    // This is the key permission the app needs to detect your stop.
+    // Trigger the OS-level location prompt now. This is the key permission the app needs.
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        () => {},
-        () => {},
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
+      await new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          resolve,
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      });
     }
 
-    // Request system notification permission (if available).
+    // Request web notification permission when the browser/WebView supports it.
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       try { await Notification.requestPermission(); } catch (e) { /* ignore */ }
     }
@@ -47,7 +57,7 @@ export default function PermissionPrompt() {
     <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed inset-0 z-[90] flex items-end justify-center"
+          className="fixed inset-0 z-[190] flex items-end justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -58,7 +68,7 @@ export default function PermissionPrompt() {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="relative w-full max-w-md bg-card border-t border-border rounded-t-3xl p-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]"
+            className="relative w-full max-w-md bg-card border-t border-border rounded-t-3xl p-6 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] max-h-[82vh] overflow-y-auto"
           >
             <div className="w-12 h-1.5 rounded-full bg-border mx-auto mb-6" />
 
@@ -66,15 +76,17 @@ export default function PermissionPrompt() {
               <Bell className="w-7 h-7 text-primary" />
             </div>
 
-            <h2 className="text-xl font-extrabold mb-2">Enable alerts</h2>
+            <h2 className="text-xl font-extrabold mb-2">Enable stop alerts</h2>
             <p className="text-sm text-muted-foreground mb-5">
-              Wake Stop needs permission to alert you with sound and vibration so you never miss your stop.
+              On Android and iPhone, allow location when prompted so Wake Stop can detect your stop. If a notification prompt appears, allow that too.
             </p>
 
             <div className="space-y-3 mb-6">
+              <Row icon={MapPin} label="Location permission for stop detection" />
               <Row icon={Volume2} label="Sound alarm when your stop is near" />
               <Row icon={Vibrate} label="Vibration / haptic feedback" />
-              <Row icon={Bell} label="Notifications" />
+              <Row icon={Bell} label="Notifications when supported" />
+              <Row icon={Smartphone} label="If no prompt appears, enable permissions in phone app settings" />
             </div>
 
             <button

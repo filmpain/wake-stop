@@ -88,6 +88,7 @@ export default function RidePage() {
           destination_stop_type: favStop.stop_type,
           destination_lat: favStop.stop_lat,
           destination_lon: favStop.stop_lon,
+          route_id: (favStop.routes || [])[0] || '',
           started_at: new Date().toISOString(),
           status: 'active',
         });
