@@ -128,6 +128,9 @@
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* Hide the bottom nav while a bottom sheet is open so its actions stay reachable */
+html.sheet-open .bottom-nav,
 body.sheet-open .bottom-nav {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

@@ -9,9 +9,11 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
+    document.documentElement.classList.add('sheet-open');
     document.body.classList.add('sheet-open');
     document.body.style.overflow = 'hidden';
     return () => {
+      document.documentElement.classList.remove('sheet-open');
       document.body.classList.remove('sheet-open');
       document.body.style.overflow = previousOverflow;
     };
@@ -58,14 +60,14 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 z-[100]"
+            className="fixed inset-0 bg-black/60 z-[9998]"
           />
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-[200] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+6rem)] max-w-md mx-auto max-h-[82vh] overflow-y-auto shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-[9999] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+2rem)] max-w-md mx-auto max-h-[82vh] overflow-y-auto shadow-2xl"
           >
             <div className="w-12 h-1.5 rounded-full bg-border mx-auto mb-5" />
             <div className="flex items-start justify-between mb-4">
