@@ -190,6 +190,28 @@ export default function RidePage() {
         </div>
       </div>
 
+      {/* Quick verification map */}
+      <div className="bg-card border border-border rounded-3xl overflow-hidden mb-4">
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Verify line</div>
+            <div className="text-sm font-semibold">Confirm this is your stop and route</div>
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+            {(favStop.routes || []).slice(0, 3).map(r => <RouteBadge key={r} route={r} size="sm" />)}
+          </div>
+        </div>
+        <div className="h-36 border-t border-border">
+          <RideMap
+            userLat={position?.lat}
+            userLon={position?.lon}
+            destLat={favStop.stop_lat}
+            destLon={favStop.stop_lon}
+            className="w-full h-full"
+          />
+        </div>
+      </div>
+
       {/* Service alerts for this route */}
       <ServiceAlertBanner alerts={serviceAlerts} />
 
@@ -202,17 +224,6 @@ export default function RidePage() {
         permissionState={permissionState}
         locError={locError}
       />
-
-      {/* Map */}
-      <div className="mt-4 rounded-3xl overflow-hidden border border-border" style={{ height: 260 }}>
-        <RideMap
-          userLat={position?.lat}
-          userLon={position?.lon}
-          destLat={favStop.stop_lat}
-          destLon={favStop.stop_lon}
-          className="w-full h-full"
-        />
-      </div>
 
       {/* Cancel */}
       <button
