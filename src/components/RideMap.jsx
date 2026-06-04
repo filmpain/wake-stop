@@ -32,7 +32,7 @@ export default function RideMap({ userLat, userLon, destLat, destLon, className 
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
   const destMarkerRef = useRef(null);
-  const lineRef = useRef(null);
+
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -55,7 +55,7 @@ export default function RideMap({ userLat, userLon, destLat, destLon, className 
       mapRef.current = null;
       userMarkerRef.current = null;
       destMarkerRef.current = null;
-      lineRef.current = null;
+
     };
   }, [destLat, destLon]);
 
@@ -70,14 +70,6 @@ export default function RideMap({ userLat, userLon, destLat, destLon, className 
     } else {
       userMarkerRef.current = L.marker([userLat, userLon], { icon: userIcon }).addTo(map);
     }
-
-    if (lineRef.current) map.removeLayer(lineRef.current);
-    lineRef.current = L.polyline([[userLat, userLon], [destLat, destLon]], {
-      color: 'hsl(217 91% 60%)',
-      weight: 4,
-      opacity: 0.7,
-      dashArray: '8 8',
-    }).addTo(map);
 
     const bounds = L.latLngBounds([[userLat, userLon], [destLat, destLon]]);
     map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15, animate: false });
