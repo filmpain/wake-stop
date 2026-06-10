@@ -11,8 +11,8 @@ const tabs = [
 export default function BottomNav() {
   const { pathname } = useLocation();
   return (
-    <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-30 bg-background/90 backdrop-blur-lg border-t border-border">
-      <div className="max-w-md mx-auto flex items-stretch h-16 px-2 pb-[env(safe-area-inset-bottom)]">
+    <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-30 bg-background/90 backdrop-blur-lg border-t border-border pb-[env(safe-area-inset-bottom)]">
+      <div className="max-w-md mx-auto flex items-stretch h-16 px-2">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const active = pathname === tab.to;

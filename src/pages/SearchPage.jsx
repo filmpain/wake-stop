@@ -109,6 +109,7 @@ export default function SearchPage() {
           <StopCard
             key={`${stop.stop_type}-${stop.stop_id}`}
             stop={stop}
+            onTap={toggleFavorite}
             onArm={handleArm}
             onToggleFavorite={toggleFavorite}
             isFavorite={favIds.has(stop.stop_id)}

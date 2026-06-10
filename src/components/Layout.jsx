@@ -47,7 +47,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen text-foreground bg-transparent">
       <AppBackground />
-      <div className="max-w-md mx-auto pb-20 relative z-10">
+      <div className="max-w-md mx-auto pb-[calc(env(safe-area-inset-bottom)+6.5rem)] relative z-10">
         {TABS.map(({ path, Component }) => {
           const active = pathname === path;
           return (
