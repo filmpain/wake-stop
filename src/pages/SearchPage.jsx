@@ -11,30 +11,50 @@ export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [favorites, setFavorites] = useState([]);
   const [pendingStop, setPendingStop] = useState(null);
+  const [busyIds, setBusyIds] = useState(() => new Set());
 
   useEffect(() => {
     base44.entities.FavoriteStop.list('sort_order', 100).then(setFavorites);
+  }, []);
+
+  // Reset to initial state when the Search tab is re-tapped in the bottom nav.
+  useEffect(() => {
+    const onReset = (e) => {
+      if (e.detail === '/search') setQuery('');
+    };
+    window.addEventListener('tab-reset', onReset);
+    return () => window.removeEventListener('tab-reset', onReset);
   }, []);
 
   const results = useMemo(() => searchStops(query, 40), [query]);
   const favIds = useMemo(() => new Set(favorites.map(f => f.stop_id)), [favorites]);
 
   const toggleFavorite = async (stop) => {
-    const existing = favorites.find(f => f.stop_id === stop.stop_id);
-    if (existing) {
-      await base44.entities.FavoriteStop.delete(existing.id);
-      setFavorites(favorites.filter(f => f.id !== existing.id));
-    } else {
-      const created = await base44.entities.FavoriteStop.create({
-        stop_id: stop.stop_id,
-        stop_name: stop.stop_name,
-        stop_type: stop.stop_type,
-        routes: stop.routes,
-        stop_lat: stop.stop_lat,
-        stop_lon: stop.stop_lon,
-        sort_order: favorites.length,
+    if (busyIds.has(stop.stop_id)) return;
+    setBusyIds(prev => new Set(prev).add(stop.stop_id));
+    try {
+      const existing = favorites.find(f => f.stop_id === stop.stop_id);
+      if (existing) {
+        await base44.entities.FavoriteStop.delete(existing.id);
+        setFavorites(prev => prev.filter(f => f.id !== existing.id));
+      } else {
+        const created = await base44.entities.FavoriteStop.create({
+          stop_id: stop.stop_id,
+          stop_name: stop.stop_name,
+          stop_type: stop.stop_type,
+          routes: stop.routes,
+          stop_lat: stop.stop_lat,
+          stop_lon: stop.stop_lon,
+          sort_order: favorites.length,
+        });
+        setFavorites(prev => [...prev, created]);
+      }
+    } finally {
+      setBusyIds(prev => {
+        const next = new Set(prev);
+        next.delete(stop.stop_id);
+        return next;
       });
-      setFavorites([...favorites, created]);
     }
   };
 

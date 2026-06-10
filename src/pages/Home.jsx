@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Plus, Moon, Sun, Zap } from 'lucide-react';
@@ -94,24 +94,31 @@ export default function Home() {
     navigate(`/ride/${encodeURIComponent(stop.stop_id)}`);
   };
 
+  const favBusyRef = useRef(new Set());
   const handleToggleFavorite = async (stop) => {
-    const existing = favorites.find((fav) => fav.stop_id === stop.stop_id);
-    if (existing) {
-      await base44.entities.FavoriteStop.delete(existing.id);
-      setFavorites((prev) => prev.filter((f) => f.id !== existing.id));
-      return;
-    }
+    if (favBusyRef.current.has(stop.stop_id)) return;
+    favBusyRef.current.add(stop.stop_id);
+    try {
+      const existing = favorites.find((fav) => fav.stop_id === stop.stop_id);
+      if (existing) {
+        await base44.entities.FavoriteStop.delete(existing.id);
+        setFavorites((prev) => prev.filter((f) => f.id !== existing.id));
+        return;
+      }
 
-    const created = await base44.entities.FavoriteStop.create({
-      stop_id: stop.stop_id,
-      stop_name: stop.stop_name,
-      stop_type: stop.stop_type,
-      routes: stop.routes || [],
-      stop_lat: stop.stop_lat,
-      stop_lon: stop.stop_lon,
-      sort_order: favorites.length,
-    });
-    setFavorites((prev) => [...prev, created]);
+      const created = await base44.entities.FavoriteStop.create({
+        stop_id: stop.stop_id,
+        stop_name: stop.stop_name,
+        stop_type: stop.stop_type,
+        routes: stop.routes || [],
+        stop_lat: stop.stop_lat,
+        stop_lon: stop.stop_lon,
+        sort_order: favorites.length,
+      });
+      setFavorites((prev) => [...prev, created]);
+    } finally {
+      favBusyRef.current.delete(stop.stop_id);
+    }
   };
 
   const handleToggleArm = async (stop) => {
