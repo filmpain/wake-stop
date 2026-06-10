@@ -12,10 +12,14 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
     document.documentElement.classList.add('sheet-open');
     document.body.classList.add('sheet-open');
     document.body.style.overflow = 'hidden';
+    // Inline styles as a hard guarantee — some Android WebViews miss the CSS class rule.
+    const navs = document.querySelectorAll('.bottom-nav');
+    navs.forEach((el) => { el.style.display = 'none'; });
     return () => {
       document.documentElement.classList.remove('sheet-open');
       document.body.classList.remove('sheet-open');
       document.body.style.overflow = previousOverflow;
+      navs.forEach((el) => { el.style.display = ''; });
     };
   }, [open]);
 
@@ -67,7 +71,7 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-[9999] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+2rem)] max-w-md mx-auto max-h-[82vh] overflow-y-auto shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-[9999] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+3.5rem)] max-w-md mx-auto max-h-[82dvh] overflow-y-auto shadow-2xl"
           >
             <div className="w-12 h-1.5 rounded-full bg-border mx-auto mb-5" />
             <div className="flex items-start justify-between mb-4">
