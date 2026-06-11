@@ -6,6 +6,8 @@ import { useTheme } from '@/lib/ThemeContext';
 import { SOUND_OPTIONS, HAPTIC_OPTIONS, triggerAlert, vibrate, isVibrationSupported } from '@/lib/alerts';
 import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
+import PermissionStatus from '@/components/PermissionStatus';
+import AlertHelp from '@/components/AlertHelp';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -93,6 +95,11 @@ export default function SettingsPage() {
         </button>
         <h1 className="text-lg font-bold">Settings</h1>
       </div>
+
+      {/* Permissions */}
+      <Section title="Permissions" icon={Bell}>
+        <PermissionStatus />
+      </Section>
 
       {/* Theme */}
       <Section title="Appearance">
@@ -185,6 +192,13 @@ export default function SettingsPage() {
         <Play className="w-5 h-5" />
         Test alert
       </button>
+
+      {/* Alert help */}
+      <div className="mt-6">
+        <Section title="Alerts not working?" icon={AlertTriangle}>
+          <AlertHelp />
+        </Section>
+      </div>
 
       {/* Danger zone */}
       <Section title="Danger Zone" icon={AlertTriangle}>
