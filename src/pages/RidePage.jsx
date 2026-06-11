@@ -7,7 +7,7 @@ import { findStopById } from '@/lib/gtfsData';
 import { useGeoLocation } from '@/lib/useGeoLocation';
 import { useSettings } from '@/lib/useSettings';
 import { useWakeLock } from '@/lib/useWakeLock';
-import { haversineMeters, metersToStops, formatDistance } from '@/lib/distance';
+import { haversineMeters, metersToStops, formatDistance, formatMiles } from '@/lib/distance';
 import { triggerAlert, unlockAudio } from '@/lib/alerts';
 import RideMap from '@/components/RideMap';
 import RouteBadge from '@/components/RouteBadge';
@@ -275,9 +275,12 @@ function Countdown({ stopsAway, distanceMeters, warning, hasFix, permissionState
       <div className="my-2 flex items-center justify-center gap-3">
         <div className="text-7xl font-black tabular-nums leading-none">{stopsAway}</div>
       </div>
-      <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
-        <MapPin className="w-4 h-4" />
-        <span>{formatDistance(distanceMeters)}</span>
+      <div className="flex flex-col items-center gap-0.5 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1.5">
+          <MapPin className="w-4 h-4" />
+          <span>{formatMiles(distanceMeters)} away</span>
+        </div>
+        <span className="text-xs">{formatDistance(distanceMeters)} away</span>
       </div>
       <div className="mt-4 h-1.5 rounded-full bg-secondary overflow-hidden">
         <div
