@@ -13,6 +13,7 @@ import RideMap from '@/components/RideMap';
 import RouteBadge from '@/components/RouteBadge';
 import WakeAlert from '@/components/WakeAlert';
 import ServiceAlertBanner from '@/components/ServiceAlertBanner';
+import SilentModeWarning from '@/components/SilentModeWarning';
 import { useServiceAlerts } from '@/lib/useServiceAlerts';
 import { filterAlertsToSegment } from '@/lib/segmentAlerts';
 
@@ -211,6 +212,9 @@ export default function RidePage() {
           />
         </div>
       </div>
+
+      {/* Silent mode warning — sound alarms may be muted */}
+      <SilentModeWarning enabled={loaded && (settings.alert_type === 'sound' || settings.alert_type === 'both')} />
 
       {/* Service alerts for this route */}
       <ServiceAlertBanner alerts={serviceAlerts} />
