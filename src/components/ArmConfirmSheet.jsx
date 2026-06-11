@@ -1,40 +1,40 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, X } from 'lucide-react';
+import { Zap, X, Volume2, Vibrate, Bell } from 'lucide-react';
 import RouteBadge from './RouteBadge';
+import { useSettings } from '@/lib/useSettings';
+
+const ALERT_TYPES = [
+  { value: 'sound', label: 'Sound', icon: Volume2 },
+  { value: 'haptic', label: 'Haptic', icon: Vibrate },
+  { value: 'both', label: 'Both', icon: Bell },
+];
 
 export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
-  // Hide bottom nav and lock background scroll while the sheet is open.
+  const { settings, update } = useSettings();
+
+  // Lock background scroll while the modal is open.
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
-    document.documentElement.classList.add('sheet-open');
-    document.body.classList.add('sheet-open');
     document.body.style.overflow = 'hidden';
-    // Inline styles as a hard guarantee — some Android WebViews miss the CSS class rule.
-    const navs = document.querySelectorAll('.bottom-nav');
-    navs.forEach((el) => { el.style.display = 'none'; });
     return () => {
-      document.documentElement.classList.remove('sheet-open');
-      document.body.classList.remove('sheet-open');
       document.body.style.overflow = previousOverflow;
-      navs.forEach((el) => { el.style.display = ''; });
     };
   }, [open]);
 
-  // Android back gesture / button should close the sheet, not navigate away.
+  // Android back gesture / button should close the modal, not navigate away.
   useEffect(() => {
     if (!open) return;
     let closedByBack = false;
     window.history.pushState({ sheet: true }, '');
-    
+
     const onPop = () => {
       closedByBack = true;
       onClose?.();
     };
-    
-    // Native app wrapper back button support
+
     const onNativeBack = (e) => {
       e.preventDefault();
       closedByBack = true;
@@ -47,8 +47,6 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
     return () => {
       window.removeEventListener('popstate', onPop);
       document.removeEventListener('backbutton', onNativeBack, false);
-      // If the sheet was closed via a button (not the back gesture), pop the
-      // history entry we added so the back stack stays clean.
       if (!closedByBack && window.history.state?.sheet) {
         window.history.back();
       }
@@ -58,22 +56,21 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
   return createPortal(
     <AnimatePresence>
       {open && stop && (
-        <>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-5">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 z-[9998]"
+            className="absolute inset-0 bg-black/60"
           />
           <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-[9999] bg-card border-t border-border rounded-t-3xl px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+3.5rem)] max-w-md mx-auto max-h-[82dvh] overflow-y-auto shadow-2xl"
+            initial={{ opacity: 0, scale: 0.92, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 16 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            className="relative w-full max-w-sm bg-card border border-border rounded-3xl px-6 pt-6 pb-6 max-h-[85dvh] overflow-y-auto shadow-2xl"
           >
-            <div className="w-12 h-1.5 rounded-full bg-border mx-auto mb-5" />
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Arm alarm for</div>
@@ -90,6 +87,48 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
               </button>
             </div>
 
+            {/* Stops before */}
+            <div className="mb-4">
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Wake me up</div>
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => update({ stops_advance_warning: n })}
+                    className={`h-14 rounded-xl border-2 transition-all ${
+                      settings.stops_advance_warning === n
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-card'
+                    }`}
+                  >
+                    <div className="text-lg font-extrabold leading-none">{n}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">stop{n > 1 ? 's' : ''} early</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Alert type */}
+            <div className="mb-5">
+              <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Alert type</div>
+              <div className="grid grid-cols-3 gap-2">
+                {ALERT_TYPES.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    onClick={() => update({ alert_type: value })}
+                    className={`h-14 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all ${
+                      settings.alert_type === value
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-card'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="text-[10px] font-semibold">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <p className="text-sm text-muted-foreground mb-5">
               We'll monitor your location and wake you up when you're approaching this stop.
             </p>
@@ -102,7 +141,7 @@ export default function ArmConfirmSheet({ stop, open, onClose, onConfirm }) {
               Arm alarm
             </button>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>,
     document.body
