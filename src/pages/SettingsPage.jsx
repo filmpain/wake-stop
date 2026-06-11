@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Bell, Vibrate, Volume2, Moon, Sun, Play, Trash2, AlertTriangle, UserX, Loader2 } from 'lucide-react';
+import { ArrowLeft, Bell, Vibrate, Volume2, Moon, Sun, Play, Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { useSettings } from '@/lib/useSettings';
 import { useTheme } from '@/lib/ThemeContext';
 import { SOUND_OPTIONS, HAPTIC_OPTIONS, triggerAlert, vibrate, isVibrationSupported } from '@/lib/alerts';
@@ -26,7 +26,6 @@ export default function SettingsPage() {
   const { theme, setMode } = useTheme();
   const { toast } = useToast();
   const [clearing, setClearing] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   if (!loaded) {
     return <div className="p-6 text-muted-foreground">Loading…</div>;
@@ -76,16 +75,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (deleting) return;
-    setDeleting(true);
-    try {
-      await base44.functions.invoke('deleteAccount', {});
-      base44.auth.logout();
-    } finally {
-      setDeleting(false);
-    }
-  };
 
   return (
     <div className="px-5 pt-[env(safe-area-inset-top)] pb-6">
@@ -237,40 +226,6 @@ export default function SettingsPage() {
           </AlertDialog>
         </div>
 
-        <div className="border-2 border-destructive/30 rounded-2xl p-4 bg-destructive/5 mt-3">
-          <div className="font-semibold text-sm mb-1">Delete account</div>
-          <div className="text-xs text-muted-foreground mb-3">
-            Permanently deletes your account and all associated data. You will be signed out.
-          </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button
-                disabled={deleting}
-                className="w-full h-11 rounded-xl bg-destructive text-destructive-foreground font-bold flex items-center justify-center gap-2 disabled:opacity-60"
-              >
-                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserX className="w-4 h-4" />}
-                {deleting ? 'Deleting…' : 'Delete account'}
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This permanently deletes your account, favorite stops, ride history, and preferences. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAccount}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Yes, delete my account
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
       </Section>
 
       <div className="mt-8 text-center text-xs text-muted-foreground">
