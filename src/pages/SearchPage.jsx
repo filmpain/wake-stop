@@ -58,6 +58,10 @@ export default function SearchPage() {
     }
   };
 
+  const handleTap = (stop) => {
+    navigate(`/stop/${stop.stop_type}/${encodeURIComponent(stop.stop_id)}`);
+  };
+
   const handleArm = (stop) => {
     // Only arm when the user explicitly taps the Alarm button.
     setPendingStop(stop);
@@ -129,7 +133,7 @@ export default function SearchPage() {
           <StopCard
             key={`${stop.stop_type}-${stop.stop_id}`}
             stop={stop}
-            onTap={toggleFavorite}
+            onTap={handleTap}
             onArm={handleArm}
             onToggleFavorite={toggleFavorite}
             isFavorite={favIds.has(stop.stop_id)}

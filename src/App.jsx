@@ -11,6 +11,7 @@ import Layout from '@/components/Layout';
 import RidePage from '@/pages/RidePage';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Support from '@/pages/Support';
+import StopDetailPage from '@/pages/StopDetailPage';
 
 const PageWrap = ({ children }) => (
   <motion.div
@@ -39,6 +40,7 @@ const AnimatedRoutes = () => {
           <Route path="/settings" element={null} />
         </Route>
         <Route path="/ride/:stopId" element={<PageWrap><RidePage /></PageWrap>} />
+        <Route path="/stop/:stopType/:stopId" element={<PageWrap><StopDetailPage /></PageWrap>} />
         <Route path="/privacy" element={<PageWrap><PrivacyPolicy /></PageWrap>} />
         <Route path="/support" element={<PageWrap><Support /></PageWrap>} />
         <Route path="*" element={<PageWrap><PageNotFound /></PageWrap>} />
