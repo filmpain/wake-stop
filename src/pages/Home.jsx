@@ -8,6 +8,7 @@ import WakeStopLogo from '@/components/WakeStopLogo';
 import StopCard from '@/components/StopCard';
 import ArmedBanner from '@/components/ArmedBanner';
 import ArmConfirmSheet from '@/components/ArmConfirmSheet';
+import NicknameSheet from '@/components/NicknameSheet';
 import PullToRefresh from '@/components/PullToRefresh';
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [activeSession, setActiveSession] = useState(null);
   const [pendingStop, setPendingStop] = useState(null);
+  const [editingStop, setEditingStop] = useState(null);
 
   const activeAlertStop = activeSession ? {
     stop_id: activeSession.destination_stop_id,
@@ -121,6 +123,19 @@ export default function Home() {
     }
   };
 
+  const handleEditNickname = (stop) => {
+    setEditingStop(stop);
+  };
+
+  const handleSaveNickname = async (nickname) => {
+    if (!editingStop) return;
+    await base44.entities.FavoriteStop.update(editingStop.id, { nickname });
+    setFavorites((prev) =>
+      prev.map((f) => (f.id === editingStop.id ? { ...f, nickname } : f))
+    );
+    setEditingStop(null);
+  };
+
   const handleToggleArm = async (stop) => {
     const isArmed = activeSession && activeSession.destination_stop_id === stop.stop_id;
     if (isArmed) {
@@ -190,6 +205,7 @@ export default function Home() {
             onToggleArm={handleToggleArm}
             isFavorite={favorites.some((fav) => fav.stop_id === activeAlertStop.stop_id)}
             onToggleFavorite={handleToggleFavorite}
+            onEditNickname={handleEditNickname}
           />
         </div>
       )}
@@ -227,6 +243,7 @@ export default function Home() {
                   onToggleArm={handleToggleArm}
                   isFavorite={true}
                   onToggleFavorite={handleToggleFavorite}
+                  onEditNickname={handleEditNickname}
                 />
               </motion.div>
             ))}
@@ -253,6 +270,12 @@ export default function Home() {
         open={!!pendingStop}
         onClose={() => setPendingStop(null)}
         onConfirm={handleConfirmArm}
+      />
+      <NicknameSheet
+        stop={editingStop}
+        open={!!editingStop}
+        onClose={() => setEditingStop(null)}
+        onSave={handleSaveNickname}
       />
     </div>
   );

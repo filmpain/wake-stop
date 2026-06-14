@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Train, Bus, ChevronRight, Check, Bell } from 'lucide-react';
+import { Star, Train, Bus, ChevronRight, Check, Bell, Pencil } from 'lucide-react';
 import RouteBadge from './RouteBadge';
 
-export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, onToggleArm, isArmed, onArm, action = 'chevron' }) {
+export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, onToggleArm, isArmed, onArm, onEditNickname, action = 'chevron' }) {
   const Icon = stop.stop_type === 'subway' ? Train : Bus;
 
   return (
@@ -22,7 +22,18 @@ export default function StopCard({ stop, onTap, onToggleFavorite, isFavorite, on
               <span className="text-xs font-bold uppercase tracking-wider text-accent">{stop.nickname}</span>
             )}
           </div>
-          <div className="font-semibold text-base text-foreground truncate">{stop.stop_name}</div>
+          <div className="flex items-center gap-1.5">
+            <div className="font-semibold text-base text-foreground truncate">{stop.stop_name}</div>
+            {isFavorite && onEditNickname && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onEditNickname?.(stop); }}
+                className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-secondary shrink-0"
+                aria-label="Edit nickname"
+              >
+                <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             {(stop.routes || []).slice(0, 6).map(r => (
               <RouteBadge key={r} route={r} size="sm" />
